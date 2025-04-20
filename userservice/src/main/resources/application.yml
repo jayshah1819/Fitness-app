@@ -2,11 +2,9 @@ spring:
   application:
     name:userservice
   datasource:
-    url: jdbc:postgresql://localhost:5433/fitness_user_db
-    password: postgres
-    username: jayshah18.
-
-spring:
+    url: jdbc:postgresql://localhost:5433/fitness_users_db
+    password: jayshah18.
+    username: postgres
   jpa:
     hibernate:
       ddl-auto: update

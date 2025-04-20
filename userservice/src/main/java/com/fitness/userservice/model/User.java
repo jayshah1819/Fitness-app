@@ -1,6 +1,5 @@
-package com.fitness.userservice;
+package com.fitness.userservice.model;
 
-import com.fitness.userservice.model.UserRole;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
