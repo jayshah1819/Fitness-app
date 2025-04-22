@@ -26,7 +26,7 @@ public class Activity {
     @Id
     private String id;
     private String usersId;
-    private ActivityTpe type;
+    private ActivityType type;
     private Integer duration;
     private Integer caloriesBurned;
     private LocalDateTime startTime;

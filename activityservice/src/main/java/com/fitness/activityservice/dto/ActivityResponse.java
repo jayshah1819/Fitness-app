@@ -1,6 +1,6 @@
 package com.fitness.activityservice.dto;
 
-import com.fitness.activityservice.model.ActivityTpe;
+import com.fitness.activityservice.model.ActivityType;
 import lombok.Data;
 
 
@@ -12,7 +12,7 @@ import java.util.Map;
 public class ActivityResponse {
     private String id;
     private String usersId;
-    private ActivityTpe type;
+    private ActivityType type;
     private Integer duration;
     private Integer caloriesBurned;
     private LocalDateTime startTime;
