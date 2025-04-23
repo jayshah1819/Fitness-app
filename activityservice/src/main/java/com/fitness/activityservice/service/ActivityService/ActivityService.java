@@ -23,7 +23,7 @@ public class ActivityService {
                 .build();
 
         Activity savedActivity = activityRepository.save(activity);
-        return
+        return mapToResponse(activity);
 
 
     }
@@ -37,6 +37,8 @@ public class ActivityService {
         response.setStartTime(activity.getStartTime());
         response.setAdditionalMetrics(activity.getAdditionalMetrics());
         response.setCreatedAt(activity.getCreatedAt());
+        response.setUpdatedAt(activity.getUpdatedAt());
+        return response;
 
     }
 }
