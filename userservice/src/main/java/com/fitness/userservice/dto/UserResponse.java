@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public class UserResponse {
     //copied from the u
     private String id;
+    private String userId;
     private String email;
     private String password;
     private String firstName;

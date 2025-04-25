@@ -1,7 +1,6 @@
 package com.fitness.activityservice.controller;
 
 
-import com.fitness.activityservice.ActivityserviceApplication;
 import com.fitness.activityservice.dto.ActivityRequest;
 import com.fitness.activityservice.dto.ActivityResponse;
 import com.fitness.activityservice.service.ActivityService.ActivityService;
@@ -27,12 +26,14 @@ public class ActivityController {
 
     }
     @GetMapping
-    public ResponseEntity<ActivityResponse> getActivity(@RequestBody ActivityRequest request){
-        return ResponseEntity.ok(activityService.getActivity(request));
+    public ResponseEntity<List<ActivityResponse>> getUserActivities(@RequestHeader("X-User_ID") String userId){
+         return ResponseEntity.ok(activityService.getActivities(userId));
     }
-    @GetMapping
-    public ResponseEntity<List<ActivityResponse>> trackUserActivities(@RequestHeader("X-User_ID") String userId)  {
-        return ResponseEntity.ok(activityService.trackUserActivities(UserId));
+    @GetMapping("/{activityId}")
+    public ResponseEntity<ActivityResponse> getActivities(@PathVariable String activityId){
+        return ResponseEntity.ok(activityService.getActivityById(activityId));
+    }
+
 
 
 }
