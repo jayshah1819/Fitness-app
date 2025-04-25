@@ -23,7 +23,7 @@ public class ActivityService {
                 .build();
 
         Activity savedActivity = activityRepository.save(activity);
-        return mapToResponse(activity);
+        return mapToResponse(savedActivity);
 
 
     }
