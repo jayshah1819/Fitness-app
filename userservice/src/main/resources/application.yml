@@ -1,10 +1,10 @@
 spring:
   application:
-    name:userservice
+    name: user-service
   datasource:
     url: jdbc:postgresql://localhost:5433/fitness_users_db
-    password: jayshah18.
     username: postgres
+    password: jayshah18.
   jpa:
     hibernate:
       ddl-auto: update
@@ -12,3 +12,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
