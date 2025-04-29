@@ -19,12 +19,9 @@ public class WebClientConfig {
     @Bean
     public WebClient userServiceWebClient(WebClient.Builder webClientBuilder) {
         return webClientBuilder
-                .baseUrl("http://USER-SERVICE")
+                .baseUrl("http://localhost:8080")
                 .build();
     }
-    public WebClient activityServiceWebClient(WebClient.Builder webClientBuilder) {
-        return webClientBuilder
-                .baseUrl("http://ACTIVITY-SERVICE").
-                        build();
-    }
+
+
 }
