@@ -17,6 +17,7 @@ public class WebClientConfig {
 
     }
     @Bean
+    @LoadBalanced
     public WebClient userServiceWebClient(WebClient.Builder webClientBuilder) {
         return webClientBuilder
                 .baseUrl("http://localhost:8080")
