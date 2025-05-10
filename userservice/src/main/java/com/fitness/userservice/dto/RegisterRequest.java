@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 //Added not Blank
+
 public class RegisterRequest {
     @NotBlank(message="Email is required")
     @Email(message = "Invalid email format")

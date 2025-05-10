@@ -2,7 +2,7 @@ package com.fitness.userservice.dto;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-
+//Data
 @Data
 public class UserResponse {
     //copied from the u
