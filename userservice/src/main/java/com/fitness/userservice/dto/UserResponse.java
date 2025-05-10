@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 //Data
 @Data
 public class UserResponse {
-    //copied from the u
     private String id;
     private String userId;
     private String email;
