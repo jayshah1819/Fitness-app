@@ -25,7 +25,7 @@ public class UserService {
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         User savedUser=repository.save(user);
-
+//new userResponse will be added
         UserResponse userResponse = new UserResponse();
         userResponse.setEmail(savedUser.getEmail());
         userResponse.setPassword(savedUser.getPassword());
