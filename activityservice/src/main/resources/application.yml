@@ -3,8 +3,11 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017
       database: fitnessActivity
+  application:
+    name: activity-service
 server:
   port: 8082
+
 eureka:
   client:
     serviceUrl:
