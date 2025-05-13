@@ -1,8 +1,8 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://localhost:27017
-      database: fitnessActivity
+      uri: mongodb://localhost:27017/fitnessActivity
+      database: activities
   application:
     name: activity-service
 server:
