@@ -13,5 +13,11 @@ public class RecommendationService {
     private RecommendationRepository recommendationRepository;
 
     public List<Recommendation> getUserRecommendations(String userId) {
+        return recommendationRepository.findByUserId(userId);
+    }
+
+    public Recommendation getUserActivity(String activityId) {
+        return recommendationRepository.findByActivityId(activityId).orElseThrow(()->new RuntimeException("No such Activity for this activity"+activityId));
+
     }
 }
