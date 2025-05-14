@@ -7,8 +7,6 @@ spring:
     data:
       mongodb:
         uri: mongodb://localhost:27017/fitnessrecommendations
-        database: recommendations
-
 eureka:
   client:
     serviceUrl:
