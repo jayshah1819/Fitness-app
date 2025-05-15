@@ -20,8 +20,8 @@ public class RabbitMqConfig {
     private String routingKey;
 
     @Bean
-    public DirectExchange fitnessExchange() {
-        return new DirectExchange(exchange, true, false); // durable, not auto-delete
+    public FanoutExchange fitnessExchange() {
+        return new FanoutExchange(exchange, true, false); // durable, not auto-delete
     }
 
     @Bean
@@ -30,8 +30,8 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public Binding activityBinding(Queue activityQueue, DirectExchange fitnessExchange) {
-        return BindingBuilder.bind(activityQueue).to(fitnessExchange).with(routingKey);
+    public Binding activityBinding(Queue activityQueue, FanoutExchange fitnessExchange) {
+        return BindingBuilder.bind(activityQueue).to(fitnessExchange); // No routing key for Fanout
     }
 
     @Bean
