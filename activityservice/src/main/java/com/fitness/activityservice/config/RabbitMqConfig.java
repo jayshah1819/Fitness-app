@@ -1,9 +1,6 @@
 package com.fitness.activityservice.config;
 
-import org.springframework.amqp.core.FanoutExchange;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
@@ -23,22 +20,22 @@ public class RabbitMqConfig {
     private String routingKey;
 
     @Bean
+    public DirectExchange fitnessExchange() {
+        return new DirectExchange(exchange, true, false); // durable, not auto-delete
+    }
+
+    @Bean
     public Queue activityQueue() {
-        return new Queue(queue, true);  // Ensure durability of the queue
+        return new Queue(queue, true); // durable queue
     }
 
     @Bean
-    public FanoutExchange fanoutExchange() {
-        return new FanoutExchange(exchange, true, false);  // Exchange with durability
-    }
-
-    @Bean
-    public Binding binding(Queue activityQueue, FanoutExchange fanoutExchange) {
-        return BindingBuilder.bind(activityQueue).to(fanoutExchange);  // Bind queue to the exchange
+    public Binding activityBinding(Queue activityQueue, DirectExchange fitnessExchange) {
+        return BindingBuilder.bind(activityQueue).to(fitnessExchange).with(routingKey);
     }
 
     @Bean
     public MessageConverter messageConverter() {
-        return new Jackson2JsonMessageConverter();  // Convert messages to JSON
+        return new Jackson2JsonMessageConverter(); // Convert messages to/from JSON
     }
 }
