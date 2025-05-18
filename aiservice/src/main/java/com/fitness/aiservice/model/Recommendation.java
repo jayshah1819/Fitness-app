@@ -15,14 +15,22 @@ import java.util.List;
 public class Recommendation {
     @Id
     private String id;
+
     private String activityId;
     private String userId;
     private String activityType;
+
     private String recommendation;
     private List<String> improvements;
-    private String  suggestions;
+    private List<String> suggestions;
     private String safety;
 
+    // New rich structured fields
+    private String aiPoweredRecoveryTip;
+    private String smartSnackPairing;
+    private String metabolicRepairMode;
+    private String futureProjections;
+    private List<String> funFacts;
 
     @CreatedDate
     private LocalDateTime createdAt;
