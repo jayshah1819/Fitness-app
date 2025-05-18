@@ -7,7 +7,7 @@ import java.util.Map;
 public class GeminiService {
     private final WebClient webClient;
 
-    
+
     public GeminiService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.build();
 
