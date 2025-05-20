@@ -11,10 +11,10 @@ import java.util.Map;
 public class GeminiService {
     private final WebClient webClient;
 
-    @Value("${GEMINI_API_URL}")
+    @Value("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent")
     private String geminiApiUrl;
 
-    @Value("${GEMINI_API_KEY}")
+    @Value("AIzaSyBBpbOiJBwxArmvnko2YizptzDbwIKtI6U")
     private String geminiApiKey;
 
     public GeminiService(WebClient.Builder webClientBuilder) {

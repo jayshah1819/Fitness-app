@@ -25,4 +25,8 @@ public class Activity {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    public String getusersId() {
+        return usersId;
+    };
 }

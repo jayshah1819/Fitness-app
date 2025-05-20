@@ -1,9 +1,18 @@
 package com.fitness.aiservice.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fitness.aiservice.model.Activity;
+import com.fitness.aiservice.model.Recommendation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -11,144 +20,153 @@ import org.springframework.stereotype.Service;
 public class ActivityAIService {
     private final GeminiService geminiService;
 
-    public String generateRecommendation(Activity activity) {
+    public Recommendation generateRecommendation(Activity activity) {
         String prompt = createPromptForActivity(activity);
         String aiResponse = geminiService.getAnswer(prompt);
-        log.info("RESPONSE FROM AI: {}", aiResponse);
-        return aiResponse;
+        log.info("RESPONSE FROM AI: {} ", aiResponse);
+        return processAiResponse(activity, aiResponse);
+    }
+
+    private Recommendation processAiResponse(Activity activity, String aiResponse) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readTree(aiResponse);
+
+            JsonNode textNode = rootNode.path("candidates")
+                    .get(0)
+                    .path("content")
+                    .path("parts")
+                    .get(0)
+                    .path("text");
+
+            String jsonContent = textNode.asText()
+                    .replaceAll("```json\\n","")
+                    .replaceAll("\\n```", "")
+                    .trim();
+
+//            log.info("PARSED RESPONSE FROM AI: {} ", jsonContent);
+
+            JsonNode analysisJson = mapper.readTree(jsonContent);
+            JsonNode analysisNode = analysisJson.path("analysis");
+
+            StringBuilder fullAnalysis = new StringBuilder();
+            addAnalysisSection(fullAnalysis, analysisNode, "overall", "Overall:");
+            addAnalysisSection(fullAnalysis, analysisNode, "pace", "Pace:");
+            addAnalysisSection(fullAnalysis, analysisNode, "heartRate", "Heart Rate:");
+            addAnalysisSection(fullAnalysis, analysisNode, "caloriesBurned", "Calories:");
+
+            List<String> improvements = extractImprovements(analysisJson.path("improvements"));
+            List<String> suggestions = extractSuggestions(analysisJson.path("suggestions"));
+            List<String> safety = extractSafetyGuidelines(analysisJson.path("safety"));
+
+            return Recommendation.builder()
+                    .activityId(activity.getId())
+                    .userId(activity.getusersId())
+                    .activityType(activity.getType())
+                    .recommendation(fullAnalysis.toString().trim())
+                    .improvements(improvements)
+                    .suggestions(suggestions)
+                    .safety(safety)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return createDefaultRecommendation(activity);
+        }
+    }
+
+    private Recommendation createDefaultRecommendation(Activity activity) {
+    }
+
+
+    private List<String> extractSafetyGuidelines(JsonNode safetyNode) {
+        List<String> safety = new ArrayList<>();
+        if (safetyNode.isArray()) {
+            safetyNode.forEach(item -> safety.add(item.asText()));
+        }
+        return safety.isEmpty() ?
+                Collections.singletonList("Follow general safety guidelines") :
+                safety;
+    }
+
+    private List<String> extractSuggestions(JsonNode suggestionsNode) {
+        List<String> suggestions = new ArrayList<>();
+        if (suggestionsNode.isArray()) {
+            suggestionsNode.forEach(suggestion -> {
+                String workout = suggestion.path("workout").asText();
+                String description = suggestion.path("description").asText();
+                suggestions.add(String.format("%s: %s", workout, description));
+            });
+        }
+        return suggestions.isEmpty() ?
+                Collections.singletonList("No specific suggestions provided") :
+                suggestions;
+    }
+
+    private List<String> extractImprovements(JsonNode improvementsNode) {
+        List<String> improvements = new ArrayList<>();
+        if (improvementsNode.isArray()) {
+            improvementsNode.forEach(improvement -> {
+                String area = improvement.path("area").asText();
+                String detail = improvement.path("recommendation").asText();
+                improvements.add(String.format("%s: %s", area, detail));
+            });
+        }
+        return improvements.isEmpty() ?
+                Collections.singletonList("No specific improvements provided") :
+                improvements;
+    }
+
+    private void addAnalysisSection(StringBuilder fullAnalysis, JsonNode analysisNode, String key, String prefix) {
+        if (!analysisNode.path(key).isMissingNode()) {
+            fullAnalysis.append(prefix)
+                    .append(analysisNode.path(key).asText())
+                    .append("\n\n");
+        }
     }
 
     private String createPromptForActivity(Activity activity) {
         return String.format("""
+        Analyze this fitness activity and provide detailed recommendations in the following EXACT JSON format:
         {
-          "prompt": "Generate fitness insights for ALL activity types based on the following structure and activity-specific rules.",
-          "response_format": {
-            "ai_powered_recovery_tip": {
-              "description": "Provide activity-specific physiological recovery advice.",
-              "rules": [
-                "Cite peer-reviewed studies published after 2020",
-                "Include exact timing windows for recovery",
-                "Use metric units only"
-              ]
-            },
-            "smart_snack_pairing": {
-              "description": "Provide two ready-to-eat food combinations.",
-              "rules": [
-                "Non-perishable items only",
-                "Specify exact packaging (e.g. '200g pouch roasted almonds')",
-                "Include macros per serving (g protein/carbs/fat)"
-              ]
-            },
-            "metabolic_repair_mode": {
-              "healthy_currency": "Nutrient-dense whole food equivalent",
-              "cheat_currency": "Treat food equivalent",
-              "recovery_boost": "Muscle-repair focused foods with timing"
-            },
-            "future_projections": {
-              "description": "Provide 30-day impact projections if activity is repeated 3-5x/week.",
-              "rules": [
-                "Show body recomposition estimates",
-                "Include performance metrics",
-                "Reference exercise science principles"
-              ]
-            },
-            "fun_facts": {
-              "description": "Provide 3 verified facts per activity.",
-              "rules": [
-                "1 energy equivalence fact",
-                "1 physiological adaptation fact",
-                "1 historical/record fact"
-              ]
+          "analysis": {
+            "overall": "Overall analysis here",
+            "pace": "Pace analysis here",
+            "heartRate": "Heart rate analysis here",
+            "caloriesBurned": "Calories analysis here"
+          },
+          "improvements": [
+            {
+              "area": "Area name",
+              "recommendation": "Detailed recommendation"
             }
-          },
-          "activity_rules": {
-            "RUNNING": {
-              "priority_nutrients": ["complex carbs", "electrolytes"],
-              "recovery_window": "30-45 mins post-run",
-              "special_notes": "Impact forces require collagen support"
-            },
-            "WALKING": {
-              "priority_nutrients": ["fiber", "polyphenols"],
-              "recovery_window": "Flexible timing",
-              "special_notes": "Focus on longevity benefits"
-            },
-            "CYCLING": {
-              "priority_nutrients": ["nitrates", "carbs"],
-              "recovery_window": "Immediate to 60 mins",
-              "special_notes": "Aerobic efficiency focus"
-            },
-            "SWIMMING": {
-              "priority_nutrients": ["sodium", "magnesium"],
-              "recovery_window": "30-60 mins post-swim",
-              "special_notes": "Cold water thermoregulation"
-            },
-            "WEIGHT_TRAINING": {
-              "priority_nutrients": ["protein", "creatine"],
-              "recovery_window": "Immediate to 30 mins",
-              "special_notes": "Hypertrophy timing critical"
-            },
-            "YOGA": {
-              "priority_nutrients": ["anti-inflammatories", "GABA"],
-              "recovery_window": "Within 2 hours",
-              "special_notes": "Nervous system recovery"
-            },
-            "HIIT": {
-              "priority_nutrients": ["BCAAs", "fast carbs"],
-              "recovery_window": "Immediate to 45 mins",
-              "special_notes": "EPOC effect maximization"
-            },
-            "CARDIO": {
-              "priority_nutrients": ["carbs", "electrolytes"],
-              "recovery_window": "30 mins window",
-              "special_notes": "Heart rate zone benefits"
-            },
-            "STRETCHING": {
-              "priority_nutrients": ["collagen", "vitamin C"],
-              "recovery_window": "Flexible timing",
-              "special_notes": "Fascia hydration focus"
-            },
-            "OTHER": {
-              "priority_nutrients": ["adaptogens", "balanced macros"],
-              "recovery_window": "Case-by-case basis",
-              "special_notes": "Customize based on intensity"
+          ],
+          "suggestions": [
+            {
+              "workout": "Workout name",
+              "description": "Detailed workout description"
             }
-          },
-          "input_data": {
-            "activity_type": "%s",
-            "duration_minutes": %d,
-            "calories_burned": %d
-          },
-          "examples": {
-            "RUNNING": {
-              "ai_powered_recovery_tip": "Consume 0.8g/kg carbs + 0.3g/kg protein within 30mins to replenish glycogen (JISSN 2023)",
-              "smart_snack_pairing": {
-                "option_1": {
-                  "items": ["400g pouch roasted chickpeas", "250ml chocolate milk"],
-                  "macros": "32g protein/78g carbs/12g fat"
-                }
-              },
-              "fun_facts": [
-                "Running economy improves 5%% per 100hrs of training",
-                "500kcal run = energy to power a TV for 8 hours",
-                "Eliud Kipchoge's marathon pace: 2:50/km for 42km"
-              ]
-            },
-            "WEIGHT_TRAINING": {
-              "ai_powered_recovery_tip": "20g whey protein + 3g creatine within 30mins maximizes MPS (Nutrition Reviews 2024)",
-              "metabolic_repair_mode": {
-                "recovery_boost": "500g cottage cheese + 50g honey (nighttime casein)"
-              }
-            }
-          },
-          "strict_rules": [
-            "Never suggest raw meat/perishables",
-            "All timestamps must convert to user's local timezone",
-            "Macros must round to nearest gram",
-            "Fun facts must include DOI/PMID when available"
+          ],
+          "safety": [
+            "Safety point 1",
+            "Safety point 2"
           ]
         }
-        """, activity.getType(), activity.getDuration(), activity.getCaloriesBurned());
+
+        Analyze this activity:
+        Activity Type: %s
+        Duration: %d minutes
+        Calories Burned: %d
+        Additional Metrics: %s
+        
+        Provide detailed analysis focusing on performance, improvements, next workout suggestions, and safety guidelines.
+        Ensure the response follows the EXACT JSON format shown above.
+        """,
+                activity.getType(),
+                activity.getDuration(),
+                activity.getCaloriesBurned(),
+                activity.getAdditionalMetrics()
+        );
     }
-
 }
-
