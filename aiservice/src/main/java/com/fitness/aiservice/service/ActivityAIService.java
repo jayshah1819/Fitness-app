@@ -66,9 +66,7 @@ public class ActivityAIService {
                     .recommendation(fullAnalysis.toString().trim())
                     .improvements(improvements)
                     .suggestions(suggestions)
-                    .safety(safety)
-                    .createdAt(LocalDateTime.now())
-                    .build();
+                   
 
         } catch (Exception e) {
             e.printStackTrace();
