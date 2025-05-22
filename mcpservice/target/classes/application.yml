@@ -1,0 +1,21 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: mcp-service
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/fitness_mcp
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    preferIpAddress: true
+
+logging:
+  level:
+    org.springframework.web: INFO
+    com.fitness.mcpservice: DEBUG 

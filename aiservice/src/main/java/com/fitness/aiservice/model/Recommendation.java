@@ -23,7 +23,7 @@ public class Recommendation {
     private String recommendation;
     private List<String> improvements;
     private List<String> suggestions;
-    private String safety;
+    private List<String> safety;
 
     // New rich structured fields
     private String aiPoweredRecoveryTip;

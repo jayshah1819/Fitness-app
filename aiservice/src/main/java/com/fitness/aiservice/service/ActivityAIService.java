@@ -66,8 +66,8 @@ public class ActivityAIService {
                     .recommendation(fullAnalysis.toString().trim())
                     .improvements(improvements)
                     .suggestions(suggestions)
-                   
-
+                    .safety(safety)
+                    .build();
         } catch (Exception e) {
             e.printStackTrace();
             return createDefaultRecommendation(activity);
@@ -75,8 +75,25 @@ public class ActivityAIService {
     }
 
     private Recommendation createDefaultRecommendation(Activity activity) {
+        return Recommendation.builder()
+                .activityId(activity.getId())
+                .userId(activity.getusersId())
+                .activityType(activity.getType())
+                .recommendation("We encountered an issue analyzing your activity. Here's a general recommendation: Keep maintaining consistency in your workouts and focus on proper form.")
+                .improvements(List.of("Focus on consistency", "Maintain proper form", "Stay hydrated"))
+                .suggestions(List.of(
+                    "Basic " + activity.getType() + ": Start with fundamentals",
+                    "Recovery: Take adequate rest between sessions",
+                    "Progress gradually: Increase intensity slowly"
+                ))
+                .safety(List.of(
+                    "Always warm up before exercise",
+                    "Listen to your body",
+                    "Stay hydrated",
+                    "Cool down properly after workout"
+                ))
+                .build();
     }
-
 
     private List<String> extractSafetyGuidelines(JsonNode safetyNode) {
         List<String> safety = new ArrayList<>();
