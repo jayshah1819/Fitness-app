@@ -30,10 +30,9 @@ rabbitmq:
   routing:
     key: activity.tracking
 
-gemini:
+claude:
   api:
-    url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent
-    key: ${GEMINI_API_KEY}
+    key: ${CLAUDE_API_KEY:default-key}
 
 logging:
   level:
