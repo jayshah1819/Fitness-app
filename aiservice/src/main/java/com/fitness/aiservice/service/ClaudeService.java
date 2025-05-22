@@ -3,6 +3,7 @@ package com.fitness.aiservice.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,16 +33,20 @@ public class ClaudeService {
 
     public String getAnswer(String prompt) {
         try {
+            // Create the messages array
+            ArrayNode messagesArray = objectMapper.createArrayNode();
+            ObjectNode messageObject = objectMapper.createObjectNode()
+                    .put("role", "user")
+                    .put("content", prompt);
+            messagesArray.add(messageObject);
+
+            // Create the main request body
             ObjectNode requestBody = objectMapper.createObjectNode()
                     .put("model", "claude-3-opus-20240229")
                     .put("max_tokens", 1000)
                     .put("temperature", 0.7)
-                    .put("system", "You are an AI fitness expert assistant. Provide detailed analysis and recommendations in JSON format.")
-                    .put("messages", objectMapper.createArrayNode().add(
-                            objectMapper.createObjectNode()
-                                    .put("role", "user")
-                                    .put("content", prompt)
-                    ));
+                    .put("system", "You are an AI fitness expert assistant. Provide detailed analysis and recommendations in JSON format.");
+            requestBody.set("messages", messagesArray);
 
             String response = webClient.post()
                     .uri("/messages")

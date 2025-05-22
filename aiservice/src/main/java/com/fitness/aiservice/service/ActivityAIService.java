@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,11 +17,11 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 public class ActivityAIService {
-    private final GeminiService geminiService;
+    private final ClaudeService claudeService;
 
     public Recommendation generateRecommendation(Activity activity) {
         String prompt = createPromptForActivity(activity);
-        String aiResponse = geminiService.getAnswer(prompt);
+        String aiResponse = claudeService.getAnswer(prompt);
         log.info("RESPONSE FROM AI: {} ", aiResponse);
         return processAiResponse(activity, aiResponse);
     }
@@ -30,23 +29,7 @@ public class ActivityAIService {
     private Recommendation processAiResponse(Activity activity, String aiResponse) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode rootNode = mapper.readTree(aiResponse);
-
-            JsonNode textNode = rootNode.path("candidates")
-                    .get(0)
-                    .path("content")
-                    .path("parts")
-                    .get(0)
-                    .path("text");
-
-            String jsonContent = textNode.asText()
-                    .replaceAll("```json\\n","")
-                    .replaceAll("\\n```", "")
-                    .trim();
-
-//            log.info("PARSED RESPONSE FROM AI: {} ", jsonContent);
-
-            JsonNode analysisJson = mapper.readTree(jsonContent);
+            JsonNode analysisJson = mapper.readTree(aiResponse);
             JsonNode analysisNode = analysisJson.path("analysis");
 
             StringBuilder fullAnalysis = new StringBuilder();
@@ -69,7 +52,7 @@ public class ActivityAIService {
                     .safety(safety)
                     .build();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error processing AI response: ", e);
             return createDefaultRecommendation(activity);
         }
     }
