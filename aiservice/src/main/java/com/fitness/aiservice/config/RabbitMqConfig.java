@@ -17,31 +17,30 @@ public class RabbitMQConfig {
     @Value("${rabbitmq.queue.name}")
     private String queueName;
 
-    @Value("${rabbitmq.routing.key}")
-    private String routingKey;
-
     @Bean
     public Queue queue() {
-        return new Queue(queueName);
+        return QueueBuilder.durable(queueName)
+                .withArgument("x-message-ttl", 60000)
+                .build();
     }
 
     @Bean
-    public TopicExchange exchange() {
-        return new TopicExchange(exchangeName);
+    public FanoutExchange exchange() {
+        return new FanoutExchange(exchangeName);
     }
 
     @Bean
-    public Binding binding(Queue queue, TopicExchange exchange) {
+    public Binding binding(Queue queue, FanoutExchange exchange) {
         return BindingBuilder
                 .bind(queue)
-                .to(exchange)
-                .with(routingKey);
+                .to(exchange);
     }
 
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, MessageConverter jsonMessageConverter) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(jsonMessageConverter);
+        rabbitTemplate.setExchange(exchangeName);
         return rabbitTemplate;
     }
 } 

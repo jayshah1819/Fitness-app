@@ -18,6 +18,14 @@ spring:
     port: 5672
     username: guest
     password: guest
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-attempts: 3
+          max-interval: 10000
+          multiplier: 2.0
 
 eureka:
   client:
@@ -31,8 +39,6 @@ rabbitmq:
     name: fitness.exchange
   queue:
     name: activity.queue
-  routing:
-    key: activity.tracking
 
 claude:
   api:
@@ -43,7 +49,7 @@ claude:
 logging:
   level:
     com.fitness.aiservice: DEBUG
-    org.springframework.amqp: INFO
+    org.springframework.amqp: DEBUG
     org.springframework.data.mongodb: INFO
 
 spring.jackson:
