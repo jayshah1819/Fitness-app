@@ -1,22 +1,34 @@
 package com.fitness.aiservice.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.time.LocalDateTime;
 import java.util.Map;
 
 @Data
+@Document(collection = "activities")
 public class Activity {
     @Id
     private String id;
-    private String usersId;
+    private String userId;
     private String type;
-    private Integer duration;
-    private Integer caloriesBurned;
+    private double duration;
+    private double distance;
+    private double caloriesBurned;
+    private double heartRate;
+    private String notes;
     
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime startTime;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    private LocalDateTime timestamp;
 
     private Map<String, Object> additionalMetrics;
 
@@ -26,7 +38,7 @@ public class Activity {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
 
-    public String getusersId() {
-        return usersId;
+    public String getUserId() {
+        return userId;
     }
 }

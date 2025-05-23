@@ -18,18 +18,35 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ActivityAIService {
     private final ClaudeService claudeService;
+    private final ObjectMapper objectMapper;
+
+    public void processActivity(Activity activity) {
+        try {
+            log.info("Processing activity for user: {}", activity.getUserId());
+            Recommendation recommendation = generateRecommendation(activity);
+            log.info("Generated recommendation: {}", recommendation);
+            // Here you can add logic to store the recommendation or send it back to the user
+        } catch (Exception e) {
+            log.error("Error processing activity: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to process activity", e);
+        }
+    }
 
     public Recommendation generateRecommendation(Activity activity) {
-        String prompt = createPromptForActivity(activity);
-        String aiResponse = claudeService.getAnswer(prompt);
-        log.info("RESPONSE FROM AI: {} ", aiResponse);
-        return processAiResponse(activity, aiResponse);
+        try {
+            String prompt = createPromptForActivity(activity);
+            String aiResponse = claudeService.getAnswer(prompt);
+            log.info("RESPONSE FROM AI: {} ", aiResponse);
+            return processAiResponse(activity, aiResponse);
+        } catch (Exception e) {
+            log.error("Error generating recommendation: {}", e.getMessage(), e);
+            return createDefaultRecommendation(activity);
+        }
     }
 
     private Recommendation processAiResponse(Activity activity, String aiResponse) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode analysisJson = mapper.readTree(aiResponse);
+            JsonNode analysisJson = objectMapper.readTree(aiResponse);
             JsonNode analysisNode = analysisJson.path("analysis");
 
             StringBuilder fullAnalysis = new StringBuilder();
@@ -44,12 +61,14 @@ public class ActivityAIService {
 
             return Recommendation.builder()
                     .activityId(activity.getId())
-                    .userId(activity.getusersId())
+                    .userId(activity.getUserId())
                     .activityType(activity.getType())
                     .recommendation(fullAnalysis.toString().trim())
                     .improvements(improvements)
                     .suggestions(suggestions)
                     .safety(safety)
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
                     .build();
         } catch (Exception e) {
             log.error("Error processing AI response: ", e);
@@ -60,7 +79,7 @@ public class ActivityAIService {
     private Recommendation createDefaultRecommendation(Activity activity) {
         return Recommendation.builder()
                 .activityId(activity.getId())
-                .userId(activity.getusersId())
+                .userId(activity.getUserId())
                 .activityType(activity.getType())
                 .recommendation("We encountered an issue analyzing your activity. Here's a general recommendation: Keep maintaining consistency in your workouts and focus on proper form.")
                 .improvements(List.of("Focus on consistency", "Maintain proper form", "Stay hydrated"))
@@ -75,6 +94,8 @@ public class ActivityAIService {
                     "Stay hydrated",
                     "Cool down properly after workout"
                 ))
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
     }
 
@@ -154,17 +175,21 @@ public class ActivityAIService {
 
         Analyze this activity:
         Activity Type: %s
-        Duration: %d minutes
-        Calories Burned: %d
-        Additional Metrics: %s
+        Duration: %.2f minutes
+        Distance: %.2f km
+        Calories Burned: %.2f
+        Heart Rate: %.2f bpm
+        Notes: %s
         
         Provide detailed analysis focusing on performance, improvements, next workout suggestions, and safety guidelines.
         Ensure the response follows the EXACT JSON format shown above.
         """,
                 activity.getType(),
                 activity.getDuration(),
+                activity.getDistance(),
                 activity.getCaloriesBurned(),
-                activity.getAdditionalMetrics()
+                activity.getHeartRate(),
+                activity.getNotes()
         );
     }
 }

@@ -1,13 +1,17 @@
 server:
-  port: 8084
+  port: 8083
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: ai-service
 
   data:
     mongodb:
-      uri: mongodb://localhost:27017/fitness_ai
+      host: localhost
+      port: 27017
+      database: fitness_ai
 
   rabbitmq:
     host: localhost
@@ -32,9 +36,20 @@ rabbitmq:
 
 claude:
   api:
-    key: ${CLAUDE_API_KEY:default-key}
+    key: ${CLAUDE_API_KEY}
+    url: https://api.anthropic.com/v1/messages
+    model: claude-3-sonnet-20240229
 
 logging:
   level:
     com.fitness.aiservice: DEBUG
-    org.springframework.web: INFO
+    org.springframework.amqp: INFO
+    org.springframework.data.mongodb: INFO
+
+spring.jackson:
+  serialization:
+    write-dates-as-timestamps: false
+  deserialization:
+    fail-on-unknown-properties: false
+  date-format: yyyy-MM-dd'T'HH:mm:ss
+  time-zone: UTC
