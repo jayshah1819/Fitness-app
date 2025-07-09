@@ -63,7 +63,7 @@ Gemini is used to generate AI-powered JSON responses with:
 - [x] Gemini API integration working
 - [x] Postman used to test endpoints
 - [x] JSON prompt working as expected
-- [ ] Error handling under development
+- [x] Error handling under development
 - [ ] Dockerization of services in progress
 
 ---
